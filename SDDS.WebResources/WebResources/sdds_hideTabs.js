@@ -4,6 +4,10 @@
 //100,000,003 NSA
 //100,000,004 Technical
 
+function OnLoadEvent(context) {
+    ShowTabs(context);
+    OnLookUpClick(context);
+}
 
 function ShowTabs(context) {
     var formContext = context.getFormContext();
@@ -47,4 +51,41 @@ function ShowHideTabs(fieldVal, formContext) {
             formContext.ui.tabs.get("risk_assessment").setVisible(true);
     }
 
+}
+
+// JavaScript source code
+function OnLookUpClick(executionContext) {
+    var formContext = executionContext.getFormContext();
+    //Get all attributes on form on event.
+    formContext.data.entity.attributes.forEach(function (attribute, index) {
+        //For each attribute check whether the attribute type is "lookup" or not.
+        var attributeType = attribute.getAttributeType();
+        if (attributeType == "lookup") {
+            var attrName = attribute.getName();
+            //If attribute is of lookup type, add OnLookupTagClick event to field
+            OpenLookupDialog(formContext, attrName);
+        }
+    });
+}
+
+function OpenLookupDialog(formContext, lookupField) {
+    formContext.getControl(lookupField).addOnLookupTagClick(context => {
+        context.getEventArgs().preventDefault();
+        const lookupTagValue = context.getEventArgs().getTagValue();
+        Xrm.Navigation.navigateTo(
+            {
+                pageType: "entityrecord",
+                entityName: lookupTagValue.entityType,
+                formType: 2,
+                entityId: lookupTagValue.id
+            },
+            {
+                target: 2,
+                position: 1,
+                width: {
+                    value: 70,
+                    unit: "%"
+                }
+            });
+    });
 }
